@@ -38,7 +38,10 @@ def check_stock(request, pond_id):
     return render(request, 'stockright/check_stock.html', context)
 
 
-
+def delete_stock(request, stock_id):
+    density = StockingDensity.objects.get(id=stock_id)
+    density.delete()
+    return HttpResponseRedirect(reverse('stockright:pond', args=[density.pond.id]))
 
   
 # if form.is_valid():

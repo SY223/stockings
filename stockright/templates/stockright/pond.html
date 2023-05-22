@@ -24,6 +24,7 @@
                     <td>{{ density.to_stock }}</td>
                     <td>{{ density.verdict }}</td>
                     <td>{{ density.date_checked|date:'M d, Y H:i'}}</td>
+                    <td><a href="{% url 'stockright:delete_stock' density.id %}">Delete Density</a></td>
                 </tr>
             {% endfor%}  
         </table>
