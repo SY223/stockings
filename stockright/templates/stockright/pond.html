@@ -1,0 +1,35 @@
+{% extends 'stockright/base.html' %}
+
+{% block content %}
+    <h1>{{ pond|title }}</h1> 
+    {% if not densities %} 
+        <li>There are no dimensions for this pond.</li>
+    {% else %}
+        <table>
+            <tr>
+                <th>Pond Type</th>
+                <th>Length</th>
+                <th>Width</th>
+                <th>Height</th>
+                <th>Quantity to Stock</th>
+                <th>Recommendation</th>
+                <th>Date Checked</th>
+            </tr>
+            {% for density in densities %}
+                <tr>
+                    <td>{{ density.pond.name }}</td>
+                    <td>{{ density.length }}</td>
+                    <td>{{ density.width }}</td>
+                    <td>{{ density.height }}</td>
+                    <td>{{ density.to_stock }}</td>
+                    <td>{{ density.verdict }}</td>
+                    <td>{{ density.date_checked|date:'M d, Y H:i'}}</td>
+                </tr>
+            {% endfor%}  
+        </table>
+    {% endif %}
+    
+    <p><a href="{% url 'stockright:check_stock' pond.id %}">Check new pond dimension</a></p>
+    <p><a href="{% url 'stockright:ponds' %}">All ponds</a></p>
+
+{% endblock content %}

@@ -1,0 +1,12 @@
+{% extends 'stockright/base.html' %}
+
+{% block content %}
+    <h3>Enter Pond Dimensions</h3>
+    <form action="{% url 'stockright:check_stock' pond.id %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button name="submit">Check Stocking</button>
+    </form>
+
+{% endblock content %}

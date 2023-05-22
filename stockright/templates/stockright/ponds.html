@@ -1,0 +1,23 @@
+
+{% extends 'stockright/base.html' %}
+
+
+<!-- {% block header %}
+    <h1>Ponds</h1>
+{% endblock header %} -->
+
+{% block content %}
+    <h1>Ponds</h1>
+    <ul>
+    {% for pond in pond_type %}
+        <li>
+            <h3>
+                <a href="{% url 'stockright:pond' pond.id %}">{{ pond|title }}</a>
+            </h3>
+        </li>
+    {% empty %}
+        <li>No ponds selected</li>
+    {% endfor %}
+    </ul>
+
+{% endblock content %}
