@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from stockright.models import StockingDensity, Pond
-from stockright.forms import DensityForm
+from stockright.forms import DensityForm, PondForm
 from stockright.pond_logic import pondvolume
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 
 
@@ -11,15 +11,33 @@ def index(request):
     return render(request, 'stockright/index.html')
 
 def ponds(request):
-    pond_type = Pond.objects.order_by('name')
+    '''show all ponds of a single user'''
+    pond_type = Pond.objects.filter(owner=request.user).order_by('name')
     context = {'pond_type':pond_type}
     return render(request, 'stockright/ponds.html', context)
 
 def pond(request, pond_id):
     pond = Pond.objects.get(id=pond_id)
+    if pond.owner != request.user:
+        raise Http404
     densities = pond.stockingdensity_set.order_by('-date_checked')
     context = {'pond':pond, 'densities':densities}
     return render(request, 'stockright/pond.html', context)
+
+def new_pond(request):
+    '''create a new pond'''
+    if request.method != 'POST':
+        form = PondForm()
+    else:
+        form = PondForm(request.POST)
+        if form.is_valid():
+            new_pond = form.save(commit=False)
+            new_pond.owner = request.user
+            new_pond.save()
+            return HttpResponseRedirect(reverse('stockright:ponds'))
+    context={'form':form}
+    return render(request, 'stockright/crud/add_pond.html', context)
+
 
 def check_stock(request, pond_id):
     pond = Pond.objects.get(id=pond_id)
@@ -38,20 +56,9 @@ def check_stock(request, pond_id):
     return render(request, 'stockright/check_stock.html', context)
 
 
-def delete_stock(request, stock_id):
+def delete_density(request, stock_id):
     density = StockingDensity.objects.get(id=stock_id)
     density.delete()
     return HttpResponseRedirect(reverse('stockright:pond', args=[density.pond.id]))
 
   
-# if form.is_valid():
-#     length = form.cleaned_data['length']
-#     width = form.cleaned_data['width']
-#     height = form.cleaned_data['height']
-#     to_stock = pondvolume(length, width, height)
-#     request.session['to_stock'] = to_stock
-#     stocking_density = StockingDensity(length=length, width=width, height=height, to_stock=to_stock)
-#     stocking_density.save()
-#     return redirect(resultPage)
-# else:
-# form = DensityForm()

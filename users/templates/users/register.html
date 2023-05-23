@@ -1,0 +1,12 @@
+{% extends 'stockright/base.html' %}
+
+{% block content %}
+    <p>Register</p>
+    <form action="{% url 'users:register' %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button name="submit">register</button>
+        <input name="next" type="hidden" value="{% url 'stockright:index' %}" />
+    </form>
+{% endblock content %}

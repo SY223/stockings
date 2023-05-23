@@ -1,0 +1,15 @@
+{% extends 'stockright/base.html' %}
+
+
+{% block content %}
+    <div>
+        <h2>Give your pond a name</h2>
+        <small>Name such as <b>concrete, earthen, or tarpaulin.</b></small>
+    </div>
+    <form action="{% url 'stockright:new_pond' %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button name="submit">add pond</button>
+    </form>
+{% endblock content %}

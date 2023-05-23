@@ -16,8 +16,9 @@
             </h3>
         </li>
     {% empty %}
-        <li>No ponds selected</li>
+        <li>No ponds created yet</li>
     {% endfor %}
+    <a href="{% url 'stockright:new_pond' %}">Create new pond</a>
     </ul>
 
 {% endblock content %}

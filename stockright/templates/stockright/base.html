@@ -10,6 +10,14 @@
       <fieldset main="first-section">
         <nav>
           <span><a href="{% url 'stockright:index' %}">Home</a></span>
+          {% if user.is_authenticated %}
+            Hello {{ user.username }}
+            <a href="{% url 'stockright:ponds' %}">Ponds</a>
+            <a href="{% url 'users:logout' %}">Logout</a>  
+          {% else %}
+            <a href="{% url 'users:login' %}">Login</a>
+            <a href="{% url 'users:register' %}">Register</a>
+          {% endif %}
         </nav>
           {% block content %}
           {% endblock content %}
