@@ -1,7 +1,7 @@
 {% extends 'stockright/base.html' %}
 
 {% block content %}
-    <h3>Enter Pond Dimensions</h3>
+    <a href="{% url 'stockright:pond' pond.id %}"><h3>{{ pond|title }}</h3></a>
     <form action="{% url 'stockright:check_stock' pond.id %}" method="post">
         {% csrf_token %}
         {{ form.as_p }}

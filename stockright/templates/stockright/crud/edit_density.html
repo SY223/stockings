@@ -1,0 +1,12 @@
+{% extends 'stockright/base.html' %}
+
+
+{% block content %}
+    <h2><a href="{% url 'stockright:pond' pond.id %}">{{ pond|title }}</a></h2> 
+    <form action="{% url 'stockright:edit_density' density.id %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button name="submit">save changes</button>
+    </form>
+{% endblock content %}

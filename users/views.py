@@ -3,6 +3,12 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import login,logout, authenticate
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView
+
+
+class MyLoginView(LoginView):
+    redirect_authenticated_user = True
+    template_name='users/login.html'
 
 
 def logout_view(request):
