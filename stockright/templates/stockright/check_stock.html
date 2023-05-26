@@ -1,12 +1,18 @@
 {% extends 'stockright/base.html' %}
+{% load bootstrap3 %}
+
+{% block header %}
+    <h3><a href="{% url 'stockright:pond' pond.id %}"><< Back to {{ pond }} dimensions</a></h3>
+{% endblock header %}
 
 {% block content %}
-    <a href="{% url 'stockright:pond' pond.id %}"><h3>{{ pond|title }}</h3></a>
-    <form action="{% url 'stockright:check_stock' pond.id %}" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+<form action="{% url 'stockright:check_stock' pond.id %}" method="post" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
 
-        <button name="submit">Check Stocking</button>
-    </form>
+    {% buttons %}
+        <button name="submit" class="btn btn-primary">Check Stocking</button>
+    {% endbuttons %}
+</form>
 
 {% endblock content %}

@@ -1,11 +1,18 @@
 {% extends 'stockright/base.html' %}
 
+{% block header %}
+    <h1><a href="{% url 'stockright:ponds' %}">{{ pond|title }}</a></h1>   
+{% endblock header %}
+
 {% block content %}
-    <h1>{{ pond|title }}</h1> 
     {% if not densities %} 
         <li>There are no dimensions for this pond.</li>
     {% else %}
-        <table>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Dimensions</h3>
+        </div>
+        <table class="table">
             <tr>
                 <th>Pond Type</th>
                 <th>Length</th>
@@ -24,12 +31,15 @@
                 <td>{{ density.to_stock }}</td>
                 <td>{{ density.verdict }}</td>
                 <td>{{ density.date_checked|date:'M d, Y H:i'}}</td>
-                <td><a href="{% url 'stockright:delete_density' density.id %}">Delete Density</a></td>
+                <td><a href="{% url 'stockright:delete_density' density.id %}">Delete</a></td>
                 <td><a href="{% url 'stockright:edit_density' density.id %}">Edit</a></td>
             </tr>
             {% endfor%}  
         </table>
+    </div>
     {% endif %}
     
-    <p><a href="{% url 'stockright:check_stock' pond.id %}">Check new pond dimension</a></p>
+    <p>
+        <a href="{% url 'stockright:check_stock' pond.id %}">Check new pond dimension</a>
+    </p>
 {% endblock content %}

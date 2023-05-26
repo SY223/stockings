@@ -1,8 +1,19 @@
 {% extends 'stockright/base.html' %}
 
-{% block content %}
-    <h3>Check your pond stocking capacity</h3>
-    <p>You can check the amount of catfish you can stock in your pond till grow out.</p>
+{% block header %}
+    <div class="jumbotron">
+        <h1>Check your pond stocking capacity</h1>
+    </div>
+{% endblock header %}
 
-    <p><a href="{% url 'stockright:ponds' %}"><em>Select from list of ponds or create a new pond</em></a></p>
+{% block content %}
+    {% if user.is_authenticated %}
+    <h3>
+        <a href="{% url 'stockright:ponds' %}"><em>Select from list of ponds or create a new pond</em></a>
+    </h3>
+    {% else %}
+    <h2>
+        <a href="{% url 'users:register' %}">Register an account</a> to check your stocking capacity
+    </h2>
+    {% endif %}
 {% endblock content %}

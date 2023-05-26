@@ -1,28 +1,49 @@
+{% load bootstrap3 %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Stocking Density</title>
+    <title>Stocking Density</title>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
   </head>
   <body>
-    <main>
-      <fieldset main="first-section">
-        <nav>
-          <span><a href="{% url 'stockright:index' %}">Home</a></span>
-          {% if user.is_authenticated %}
-            Hello {{ user.username }}
-            <a href="{% url 'stockright:ponds' %}">Ponds</a>
-            <a href="{% url 'users:logout' %}">Logout</a>  
-          {% else %}
-            <a href="{% url 'users:login' %}">Login</a>
-            <a href="{% url 'users:register' %}">Register</a>
-          {% endif %}
-        </nav>
-          {% block content %}
-          {% endblock content %}
+    <!-- Static navbar -->
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed"
+          data-toggle="collapse" data-target="#navbar"
+          aria-expanded="false" aria-controls="navbar">
+          </button>
+          <a class="navbar-brand" href="{% url 'stockright:index' %}">Home</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="{% url 'stockright:ponds' %}">Ponds</a></li>
+          </ul>
+          
+          <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+              <li><a>Hello {{ user.username }}</a></li>
+              <li><a href="{% url 'users:logout' %}">Logout</a></li>
+            {% else %}
+              <li><a href="{% url 'users:login' %}">Login</a></li>
+              <li><a href="{% url 'users:register' %}">Register</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
 
-      </fieldset>
-  </main>
+    <diV class="container">
+      <div class="page-header">
+        {% block header %}{% endblock header %}
+      </div>
+      <div>
+        {% block content %}{% endblock content %}
+      </div>
+    </diV> <!-- /container -->
   </body>
 </html>

@@ -5,7 +5,7 @@ class DensityForm(forms.ModelForm):
     class Meta:
         model = StockingDensity
         fields = ['length', 'width', 'height']
-        labels = {'length': 'Length', 'width':'Width', 'height':'Height'}
+        labels = {'length': 'Length in feet', 'width':'Width in feet', 'height':'Height in feet'}
 
 class PondForm(forms.ModelForm):
     class Meta:

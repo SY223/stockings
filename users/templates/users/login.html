@@ -1,12 +1,17 @@
 {% extends 'stockright/base.html' %}
+{% load bootstrap3 %}
 
+{% block header %}
+    <h2>Login to your account</h2>
+{% endblock header %}
 {% block content %}
-    <p>Login</p>
-    <form action="{% url 'users:login' %}" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+<form action="{% url 'users:login' %}" method="post" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
 
-        <button name="submit">login</button>
-        <input name="next" type="hidden" value="{% url 'stockright:index' %}" />
-    </form>
+    {% buttons %}
+        <button name="submit" class="btn btn-primary">login</button>
+    {% endbuttons %}
+    <input name="next" type="hidden" value="{% url 'stockright:index' %}" />
+</form>
 {% endblock content %}

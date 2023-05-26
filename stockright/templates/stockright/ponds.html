@@ -1,13 +1,11 @@
 
 {% extends 'stockright/base.html' %}
 
-
-<!-- {% block header %}
+{% block header %}
     <h1>Ponds</h1>
-{% endblock header %} -->
+{% endblock header %}
 
 {% block content %}
-    <h1>Ponds</h1>
     <ul>
     {% for pond in pond_type %}
         <li>
@@ -18,7 +16,7 @@
     {% empty %}
         <li>No ponds created yet</li>
     {% endfor %}
-    <a href="{% url 'stockright:new_pond' %}">Create new pond</a>
     </ul>
+    <h3><a href="{% url 'stockright:new_pond' %}">Create new pond</a></h3>
 
 {% endblock content %}

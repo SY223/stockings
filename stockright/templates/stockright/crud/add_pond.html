@@ -1,15 +1,17 @@
 {% extends 'stockright/base.html' %}
+{% load bootstrap3 %}
 
+{% block header %}
+    <h1>Create a pond</h1>
+{% endblock header %}
 
 {% block content %}
-    <div>
-        <h2>Give your pond a name</h2>
-        <small>Name such as <b>concrete, earthen, or tarpaulin.</b></small>
-    </div>
-    <form action="{% url 'stockright:new_pond' %}" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+<form action="{% url 'stockright:new_pond' %}" method="post" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
 
-        <button name="submit">add pond</button>
-    </form>
+    {% buttons %}
+        <button name="submit" class="btn btn-primary">add pond</button>
+    {% endbuttons %}
+</form>
 {% endblock content %}
