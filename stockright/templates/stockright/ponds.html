@@ -10,7 +10,7 @@
     {% for pond in pond_type %}
         <li>
             <h3>
-                <a href="{% url 'stockright:pond' pond.id %}">{{ pond|title }}</a>
+                <a href="{% url 'stockright:pond' pond.id %}">{{ pond.name|title }}</a>
             </h3>
         </li>
     {% empty %}

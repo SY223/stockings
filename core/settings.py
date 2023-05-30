@@ -31,8 +31,8 @@ INSTALLED_APPS = [
     #3rd Party Apps
     'bootstrap3',
     #MyApps
-    'stockright',
-    'users',
+    'stockright.apps.StockrightConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [

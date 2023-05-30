@@ -23,6 +23,7 @@ def pond(request, pond_id):
     pond = Pond.objects.get(id=pond_id)
     if pond.owner != request.user:
         raise Http404
+    #pond = get_object_or_404(Pond, owner=request.user, id=pond_id)
     densities = pond.stockingdensity_set.order_by('-date_checked')
     context = {'pond':pond, 'densities':densities}
     return render(request, 'stockright/pond.html', context)
