@@ -1,11 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 class Pond(models.Model):
     '''Pond types'''
     name = models.CharField(max_length=50)
-    date_added = models.DateTimeField(auto_now_add=True)
+    date_added = models.DateTimeField(default=timezone.now)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -19,7 +20,7 @@ class StockingDensity(models.Model):
     height = models.FloatField(null=True, blank=True)
     to_stock = models.FloatField(null=True, blank=True)
     verdict = models.TextField(null=True, blank=True)
-    date_checked = models.DateTimeField(auto_now_add=True)
+    date_checked = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ['-date_checked']
