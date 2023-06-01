@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from stockright.models import StockingDensity, Pond
 from stockright.forms import DensityForm, PondForm
 from stockright.pond_logic import pondvolume
@@ -20,10 +20,10 @@ def ponds(request):
 
 @login_required
 def pond(request, pond_id):
-    pond = Pond.objects.get(id=pond_id)
-    if pond.owner != request.user:
-        raise Http404
-    #pond = get_object_or_404(Pond, owner=request.user, id=pond_id)
+    # pond = Pond.objects.get(id=pond_id)
+    # if pond.owner != request.user:
+    #     raise Http404
+    pond = get_object_or_404(Pond, owner=request.user, id=pond_id)
     densities = pond.stockingdensity_set.order_by('-date_checked')
     context = {'pond':pond, 'densities':densities}
     return render(request, 'stockright/pond.html', context)
