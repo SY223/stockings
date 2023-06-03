@@ -7,3 +7,4 @@ urlpatterns = [
     path('', include('stockright.urls')),
     path('users/', include('users.urls')),
 ]
+

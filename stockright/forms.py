@@ -5,14 +5,27 @@ class DensityForm(forms.ModelForm):
     class Meta:
         model = StockingDensity
         fields = ['length', 'width', 'height']
-        labels = {'length': 'Length in feet', 'width':'Width in feet', 'height':'Height in feet'}
-
-    def clean(self):
-        cleaned_data=super().clean()
-        length = cleaned_data.get('length')
-        if length is None:
-            raise  forms.ValidationError('These fields cannot be blank.')
+        labels = {'length': 'Length in feet', 'width':'Width in feet', 'height':'Height in feet',}
+    
+    def clean_length(self):
+        length = self.cleaned_data.get('length')
+        if length is not None and length <= 0:
+            raise forms.ValidationError('Length must be a positive value and not zero.')
         return length
+    
+    def clean_width(self):
+        width = self.cleaned_data.get('width')
+        if width is not None and width <= 0:
+            raise forms.ValidationError('Width must be a positive value and not zero.')
+        return width
+    
+    def clean_height(self):
+        height = self.cleaned_data.get('height')
+        if height is not None and height <= 0:
+            raise forms.ValidationError('Height must be a positive value and not zero.')
+        return height
+
+
 
 
 #Model Pond form
@@ -21,15 +34,3 @@ class PondForm(forms.ModelForm):
         model = Pond
         fields = ['name']
         label = {'name': 'Enter a pond name'}
-
-    def clean_name(self):
-        name = self.cleaned_data.get('name')
-        if name and Pond.objects.filter(name__icontains=name).exists():
-            raise forms.ValidationError('A pond with this name already exists. Choose a new name')
-        return name
-    
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if commit:
-            instance.save()
-        return instance

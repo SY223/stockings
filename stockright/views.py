@@ -36,12 +36,25 @@ def new_pond(request):
     else:
         form = PondForm(data=request.POST)
         if form.is_valid():
-            new_pond = form.save(commit=False)
-            new_pond.owner = request.user
-            new_pond.save()
-            return HttpResponseRedirect(reverse('stockright:ponds'))
+            pond_name = form.cleaned_data['name']
+            if Pond.objects.filter(owner=request.user, name__icontains=pond_name).exists():
+                form.add_error('name', 'A pond with this name already exists.')
+            else:
+                new_pond = form.save(commit=False)
+                new_pond.owner = request.user
+                new_pond.save()
+                return HttpResponseRedirect(reverse('stockright:ponds'))
     context={'form':form}
     return render(request, 'stockright/crud/add_pond.html', context)
+
+@login_required
+def delete_pond(request, pond_id):
+    pond = Pond.objects.get(id=pond_id)
+    owner = pond.owner
+    if owner != request.user:
+        raise Http404
+    pond.delete()
+    return HttpResponseRedirect(reverse('stockright:ponds'))
 
 @login_required
 def check_stock(request, pond_id):

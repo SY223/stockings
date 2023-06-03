@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 
+
 class Pond(models.Model):
     '''Pond types'''
     name = models.CharField(max_length=50)
@@ -11,6 +12,8 @@ class Pond(models.Model):
 
     def __str__(self):
         return self.name
+
+
 
 # Create your models here.
 class StockingDensity(models.Model):
