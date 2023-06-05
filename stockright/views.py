@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from stockright.models import StockingDensity, Pond
 from stockright.forms import DensityForm, PondForm
-from stockright.pond_logic import pondvolume
+from stockright.pond_logic import pondvolume, thirty_percent_decrease, twenty_percent_decrease
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -68,6 +68,8 @@ def check_stock(request, pond_id):
             new_check.pond = pond
             new_check.to_stock = pondvolume(new_check.length, new_check.width, new_check.height)
             new_check.verdict = f'You can humbly stock {new_check.to_stock} fishes.'
+            new_check.twenty_percent_decrease = twenty_percent_decrease(new_check.to_stock)
+            new_check.thirty_percent_decrease = thirty_percent_decrease(new_check.to_stock)
             new_check.save()
             return HttpResponseRedirect(reverse('stockright:pond', args=[pond.id]))
     context = {'pond':pond,'form':form}

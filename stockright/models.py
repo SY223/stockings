@@ -23,6 +23,8 @@ class StockingDensity(models.Model):
     height = models.FloatField(null=True, blank=True)
     to_stock = models.FloatField(null=True, blank=True)
     verdict = models.TextField(null=True, blank=True)
+    twenty_percent_decrease = models.FloatField(null=True, blank=True)
+    thirty_percent_decrease = models.FloatField(null=True, blank=True)
     date_checked = models.DateTimeField(default=timezone.now)
 
     class Meta:

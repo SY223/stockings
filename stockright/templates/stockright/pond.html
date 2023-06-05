@@ -20,6 +20,8 @@
                 <th>Height</th>
                 <th>Quantity to Stock</th>
                 <th>Recommendation</th>
+                <th>20% Decrease</th>
+                <th>30% Decrease</th>
                 <th>Date Checked</th>
             </tr>
             {% for density in densities %}
@@ -30,6 +32,8 @@
                 <td>{{ density.height }}</td>
                 <td>{{ density.to_stock }}</td>
                 <td>{{ density.verdict }}</td>
+                <td>{{ density.twenty_percent_decrease }}</td>
+                <td>{{ density.thirty_percent_decrease }}</td>
                 <td>{{ density.date_checked|date:'M d, Y H:i'}}</td>
                 <td><a href="{% url 'stockright:delete_density' density.id %}">Delete</a></td>
                 <td><a href="{% url 'stockright:edit_density' density.id %}">Edit</a></td>
