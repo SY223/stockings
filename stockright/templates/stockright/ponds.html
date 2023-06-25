@@ -12,6 +12,7 @@
             <h3>
                 <a href="{% url 'stockright:pond' pond.id %}">{{ pond.name|title }}</a>
             </h3>
+            <a href="{% url 'stockright:edit_pond_name' pond.id %}"><small><em>Edit pond</em></small></a> |
             <a href="{% url 'stockright:delete_pond' pond.id %}"><small><em>Delete pond</em></small></a>
         </li>
     {% empty %}

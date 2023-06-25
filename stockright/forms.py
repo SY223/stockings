@@ -1,5 +1,6 @@
 from django import forms
 from stockright.models import StockingDensity, Pond
+from django.utils.translation import gettext_lazy as _
 
 class DensityForm(forms.ModelForm):
     class Meta:
@@ -10,19 +11,19 @@ class DensityForm(forms.ModelForm):
     def clean_length(self):
         length = self.cleaned_data.get('length')
         if length is not None and length <= 0:
-            raise forms.ValidationError('Length must be a positive value and not zero.')
+            raise forms.ValidationError(_('Length must be a positive value and not zero.'))
         return length
     
     def clean_width(self):
         width = self.cleaned_data.get('width')
         if width is not None and width <= 0:
-            raise forms.ValidationError('Width must be a positive value and not zero.')
+            raise forms.ValidationError(_('Width must be a positive value and not zero.'))
         return width
     
     def clean_height(self):
         height = self.cleaned_data.get('height')
         if height is not None and height <= 0:
-            raise forms.ValidationError('Height must be a positive value and not zero.')
+            raise forms.ValidationError(_('Height must be a positive value and not zero.'))
         return height
 
 

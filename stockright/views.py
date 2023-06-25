@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from stockright.models import StockingDensity, Pond
 from stockright.forms import DensityForm, PondForm
-from stockright.pond_logic import pondvolume, thirty_percent_decrease, twenty_percent_decrease
+from stockright.pond_logic import pondvolume, thirty_p_decrease, twenty_p_decrease
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -48,6 +48,22 @@ def new_pond(request):
     return render(request, 'stockright/crud/add_pond.html', context)
 
 @login_required
+def edit_pond_name(request, pond_id):
+    pond = Pond.objects.get(id=pond_id)
+    name = pond.name
+    if pond.owner != request.user:
+        raise Http404
+    if request.method != 'POST':
+        form = PondForm(instance=pond)
+    else:
+        form = PondForm(instance=pond, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('stockright:ponds'))
+    context = {'pond':pond, 'name':name, 'form':form}
+    return render(request, 'stockright/crud/edit_pond_name.html', context)
+
+@login_required
 def delete_pond(request, pond_id):
     pond = Pond.objects.get(id=pond_id)
     owner = pond.owner
@@ -68,8 +84,8 @@ def check_stock(request, pond_id):
             new_check.pond = pond
             new_check.to_stock = pondvolume(new_check.length, new_check.width, new_check.height)
             new_check.verdict = f'You can humbly stock {new_check.to_stock} fishes.'
-            new_check.twenty_percent_decrease = twenty_percent_decrease(new_check.to_stock)
-            new_check.thirty_percent_decrease = thirty_percent_decrease(new_check.to_stock)
+            new_check.twenty_percent_decrease = twenty_p_decrease(new_check.to_stock)
+            new_check.thirty_percent_decrease = thirty_p_decrease(new_check.to_stock)
             new_check.save()
             return HttpResponseRedirect(reverse('stockright:pond', args=[pond.id]))
     context = {'pond':pond,'form':form}
