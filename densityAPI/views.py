@@ -5,15 +5,23 @@ from rest_framework import permissions, status
 from stockright.models import Pond, StockingDensity
 from .serializers import PondSerializer, DensitySerializer, UserSerializer
 from stockright.pond_logic import pondvolume, thirty_p_decrease, twenty_p_decrease
+from django.core.paginator import Paginator, EmptyPage
 
 
 @api_view(['GET', 'POST'])
-def pond_list(request):
+def pond_list_create(request):
     if request.method == 'GET':
-        ponds = Pond.objects.filter(owner=request.user)
+        ponds = Pond.objects.filter(owner=request.user).order_by('-date_added')
         search = request.query_params.get('search') #to search
         if search:
             ponds = ponds.filter(name__icontains=search)
+        perpage = request.query_params.get('perpage', default=2)
+        page = request.query_params.get('page', default=1)
+        paginator = Paginator(ponds, per_page=perpage)
+        try:
+            ponds = paginator.page(number=page)
+        except EmptyPage:
+            ponds = []
         serializeed_item = PondSerializer(ponds, many=True)
         return Response(serializeed_item.data, status=status.HTTP_200_OK)
     if request.method == 'POST':
@@ -43,10 +51,17 @@ def pond_detail(request, pondId):
         return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET', 'POST'])
-def densities(request, pondId):
+def densities_list_create(request, pondId):
     if request.method == 'GET':
         pond = Pond.objects.get(id=pondId)
         single_pond_densities = pond.stockingdensity_set.order_by('-date_checked')
+        perpage = request.query_params.get('perpage', default=2)
+        page = request.query_params.get('page', default=1)
+        paginator = Paginator(single_pond_densities, per_page=perpage)
+        try:
+            single_pond_densities = paginator.page(number=page)
+        except EmptyPage:
+            single_pond_densities = []
         serialized_item = DensitySerializer(single_pond_densities, many=True)
         return Response(serialized_item.data, status=status.HTTP_200_OK)
     if request.method == 'POST':
