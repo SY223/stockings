@@ -6,6 +6,8 @@ from stockright.models import Pond, StockingDensity
 from .serializers import PondSerializer, DensitySerializer, UserSerializer
 from stockright.pond_logic import pondvolume, thirty_p_decrease, twenty_p_decrease
 from django.core.paginator import Paginator, EmptyPage
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
 
 
 @api_view(['GET', 'POST'])
@@ -100,53 +102,45 @@ def density_detail(request, densityId):
 
 
 @api_view(['GET', 'POST'])
-def user_list(request):
-    if request.method == 'GET':
-        queryset = User.objects.all()
-        serialized_item = UserSerializer(queryset, many=True)
-        return Response(serialized_item.data, status=status.HTTP_200_OK)
-    if request.method == 'POST':
-        serialized_item = UserSerializer(data=request.data)
-        if serialized_item.is_valid():
-            serialized_item.save()
-            return Response(serialized_item.data, status=status.HTTP_201_CREATED)
-        return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
+def user_list_create(request):
+    if request.user.groups.filter(name='Manager').exists():
+        if request.method == 'GET':
+            queryset = User.objects.all()
+            serialized_item = UserSerializer(queryset, many=True)
+            return Response(serialized_item.data, status=status.HTTP_200_OK)
+        if request.method == 'POST':
+            serialized_item = UserSerializer(data=request.data)
+            if serialized_item.is_valid():
+                serialized_item.save()
+                return Response(serialized_item.data, status=status.HTTP_201_CREATED)
+            return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({"Error": "Only the admin manager is authorised to view this page."})
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def user_detail(request, pk):
-    try:
-        queryset = User.objects.get(pk=pk)
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
-        serialized_item = UserSerializer(queryset)
-        return Response(serialized_item.data)
-    elif request.method == 'PUT':
-        serialized_item = UserSerializer(data=request.data)
-        if serialized_item.is_valid():
-            serialized_item.save()
+    if request.user.groups.filter(name='Manager').exists():
+        try:
+            queryset = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == 'GET':
+            serialized_item = UserSerializer(queryset)
             return Response(serialized_item.data)
-        return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'DELETE':
-        queryset.delete()
-        return Response(status=status.HTTP_200_OK)
+        elif request.method == 'PUT':
+            serialized_item = UserSerializer(data=request.data)
+            if serialized_item.is_valid():
+                serialized_item.save()
+                return Response(serialized_item.data)
+            return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'DELETE':
+            queryset.delete()
+            return Response(status=status.HTTP_200_OK)
+    else:
+        return Response({"Error": "Only the admin manager is authorised to view this page."})
 
 
 
-
-
-# @api_view()
-# @permission_classes([IsAuthenticated])
-# def secret(request):
-#     return Response({'message':'Some secret message.'})
-
-# @api_view()
-# @permission_classes([IsAuthenticated])
-# def manager_view(request):
-#     if request.user.groups.filter(name='Manager').exists():
-#         return Response({'message':'Only manager should see this.'})
-#     else:
-#         return Response({'message':'You are not authorized.'}, 403)
 
 
