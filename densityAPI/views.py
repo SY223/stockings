@@ -1,23 +1,31 @@
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import permissions, status
+from rest_framework import status
 from stockright.models import Pond, StockingDensity
 from .serializers import PondSerializer, DensitySerializer, UserSerializer
 from stockright.pond_logic import pondvolume, thirty_p_decrease, twenty_p_decrease
 from django.core.paginator import Paginator, EmptyPage
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import permission_classes, throttle_classes
+from rest_framework.throttling import UserRateThrottle
+from .throttles import TenCallsPerMinute
+from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
+from dj_rest_auth.registration.views import VerifyEmailView
+from rest_framework.response import Response 
+
+
 
 
 @api_view(['GET', 'POST'])
+@throttle_classes([TenCallsPerMinute])
 def pond_list_create(request):
     if request.method == 'GET':
         ponds = Pond.objects.filter(owner=request.user).order_by('-date_added')
         search = request.query_params.get('search') #to search
         if search:
             ponds = ponds.filter(name__icontains=search)
-        perpage = request.query_params.get('perpage', default=2)
+        perpage = request.query_params.get('perpage', default=10)
         page = request.query_params.get('page', default=1)
         paginator = Paginator(ponds, per_page=perpage)
         try:
@@ -34,6 +42,7 @@ def pond_list_create(request):
         return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@throttle_classes([TenCallsPerMinute])
 def pond_detail(request, pondId):
     try:
         pond = Pond.objects.get(id=pondId, owner=request.user)
@@ -53,6 +62,7 @@ def pond_detail(request, pondId):
         return Response(status=status.HTTP_200_OK)
 
 @api_view(['GET', 'POST'])
+@throttle_classes([TenCallsPerMinute])
 def densities_list_create(request, pondId):
     if request.method == 'GET':
         pond = Pond.objects.get(id=pondId)
@@ -82,6 +92,7 @@ def densities_list_create(request, pondId):
         return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@throttle_classes([TenCallsPerMinute])
 def density_detail(request, densityId):
     try:
         density = StockingDensity.objects.get(id=densityId)
@@ -102,43 +113,44 @@ def density_detail(request, densityId):
 
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAdminUser,])
+@throttle_classes([TenCallsPerMinute])
 def user_list_create(request):
-    if request.user.groups.filter(name='Manager').exists():
-        if request.method == 'GET':
-            queryset = User.objects.all()
-            serialized_item = UserSerializer(queryset, many=True)
-            return Response(serialized_item.data, status=status.HTTP_200_OK)
-        if request.method == 'POST':
-            serialized_item = UserSerializer(data=request.data)
-            if serialized_item.is_valid():
-                serialized_item.save()
-                return Response(serialized_item.data, status=status.HTTP_201_CREATED)
-            return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response({"Error": "Only the admin manager is authorised to view this page."})
+    if request.method == 'GET':
+        queryset = User.objects.all()
+        serialized_item = UserSerializer(queryset, many=True)
+        return Response(serialized_item.data, status=status.HTTP_200_OK)
+    if request.method == 'POST':
+        serialized_item = UserSerializer(data=request.data)
+        if serialized_item.is_valid():
+            serialized_item.save()
+            return Response(serialized_item.data, status=status.HTTP_201_CREATED)
+        return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAdminUser,])
+@throttle_classes([TenCallsPerMinute])
 def user_detail(request, pk):
-    if request.user.groups.filter(name='Manager').exists():
-        try:
-            queryset = User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if request.method == 'GET':
-            serialized_item = UserSerializer(queryset)
+    try:
+        queryset = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        serialized_item = UserSerializer(queryset)
+        return Response(serialized_item.data)
+    elif request.method == 'PUT':
+        serialized_item = UserSerializer(data=request.data)
+        if serialized_item.is_valid():
+            serialized_item.save()
             return Response(serialized_item.data)
-        elif request.method == 'PUT':
-            serialized_item = UserSerializer(data=request.data)
-            if serialized_item.is_valid():
-                serialized_item.save()
-                return Response(serialized_item.data)
-            return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
-        elif request.method == 'DELETE':
-            queryset.delete()
-            return Response(status=status.HTTP_200_OK)
-    else:
-        return Response({"Error": "Only the admin manager is authorised to view this page."})
+        return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        queryset.delete()
+        return Response(status=status.HTTP_200_OK)
+    
+
+
 
 
 

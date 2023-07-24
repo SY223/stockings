@@ -1,0 +1,23 @@
+{% extends 'stockright/base.html' %}
+
+{% block title %}Log-in{% endblock %}
+
+{% block content %}
+    <h1>Log in</h1>
+    {% if form.errors %}
+        <p>Your credentials do not match.. try again</p>
+    {% else %}
+        <p>Login below</p>
+    {% endif %}
+    <form action="{% url 'users:login' %}" method="post" class="form">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <input name="next" type="hidden" value="{% url 'stockright:index' %}" />
+        <p><input type="submit" value="login"login></p>     
+    </form>
+    <p>
+        <a href="{% url 'users:password_reset' %}">
+        Forgotten your password?
+        </a>
+    </p>
+{% endblock content %}

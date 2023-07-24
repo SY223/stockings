@@ -1,6 +1,7 @@
 
 from pathlib import Path
 from decouple import config
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,8 +23,9 @@ ALLOWED_HOSTS = [config('ALLOWED_HOSTS')]
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'users.apps.UsersConfig',
     'django.contrib.auth',
+    'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -32,17 +34,15 @@ INSTALLED_APPS = [
     #3rd Party Apps
     'rest_framework',
     'rest_framework.authtoken',
+    'dj_rest_auth',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'rest_auth',
-    'rest_auth.registration',
+    'dj_rest_auth.registration',
     'bootstrap3',
     #MyApps
     'stockright.apps.StockrightConfig',
-    'users.apps.UsersConfig',
     'densityAPI.apps.DensityapiConfig',
-    
 ]
 
 MIDDLEWARE = [
@@ -140,7 +140,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #My Settings
-LOGIN_URL = '/users/login'
+#LOGIN_URL = '/users/login'
 
 BOOTSTRAP3 = {
     'include_jquery': True,
@@ -151,7 +151,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication'
 
     ],
@@ -159,8 +159,25 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '2/minute',
+        'ten': '10/minute',
+    },
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 SITE_ID = 1
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_CONFIRM_EMAIL_ON_GET =True
+
+LOGIN_REDIRECT_URL = 'stockright:index'
+#LOGIN_URL = 'users/login'
+LOGOUT_URL = 'users/logout'
+
+
+LOGIN_URL = 'http://localhost:8000/api/v1/dj-rest-auth/login'
