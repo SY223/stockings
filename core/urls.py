@@ -22,8 +22,7 @@ urlpatterns = [
             views.CustomVerifyEmailView.as_view(), name='account_confirm_email'),
     path(
         'api/v1/dj-rest-auth/account-email-verification-sent/', views.CustomEmailConfirmView.as_view(),
-        name='account_email_verification_sent',
-    )
+        name='account_email_verification_sent')
 ]
 
 if settings.DEBUG:

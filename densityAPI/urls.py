@@ -13,10 +13,10 @@ urlpatterns = [
     path('users/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('owners/', views.user_list_create),
     path('owners/<int:pk>/', views.user_detail),
-    path('ponds/', views.pond_list_create, name='pond-list-create'), #get all ponds
-    path('pond/<int:pondId>/', views.pond_detail), #get a single pond
-    path('check-stocks/<int:pondId>/', views.densities_list_create), #lists densities of a pond and check new density
-    path('single-stock/<int:densityId>/', views.density_detail), #get a single density
+    path('ponds/', views.pond_list_create, name='pond_list_create'), #get all ponds
+    path('pond/<int:pondId>/', views.pond_detail, name='pond_detail'), #get a single pond
+    path('check-stocks/<int:pondId>/', views.densities_list_create, name='check_densities'), #lists densities of a pond and check new density
+    path('single-stock/<int:densityId>/', views.density_detail, name='a_single_density'), #get a single density
     path('api-token-auth/', obtain_auth_token),
     
 ]
