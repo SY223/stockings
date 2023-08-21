@@ -1,21 +1,21 @@
 from django.contrib.auth.models import User
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework import status
 from stockright.models import Pond, StockingDensity
 from .serializers import PondSerializer, DensitySerializer, UserSerializer
 from stockright.pond_logic import pondvolume, thirty_p_decrease, twenty_p_decrease
 from django.core.paginator import Paginator, EmptyPage
 from rest_framework.permissions import IsAdminUser
-from rest_framework.decorators import permission_classes, throttle_classes
 from rest_framework.throttling import UserRateThrottle
 from .throttles import TenCallsPerMinute
-from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
-from dj_rest_auth.registration.views import VerifyEmailView
 from rest_framework.response import Response 
+from django.contrib.auth import get_user_model
+from dj_rest_auth.registration.views import VerifyEmailView
+from allauth.account.views import ConfirmEmailView
 
 
-
+User = get_user_model()
 
 @api_view(['GET', 'POST'])
 @throttle_classes([TenCallsPerMinute])
@@ -35,7 +35,7 @@ def pond_list_create(request):
         serializeed_item = PondSerializer(ponds, many=True)
         return Response(serializeed_item.data, status=status.HTTP_200_OK)
     if request.method == 'POST':
-        serialized_item = PondSerializer(data=request.data)
+        serialized_item = PondSerializer(data=request.data, context={'request':request})
         if serialized_item.is_valid():
             serialized_item.save(owner=request.user)
             return Response(serialized_item.data, status=status.HTTP_201_CREATED)
@@ -59,7 +59,7 @@ def pond_detail(request, pondId):
         return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         pond.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response({'message': f'Pond {pond} successfully deleted..'},status=status.HTTP_200_OK)
 
 @api_view(['GET', 'POST'])
 @throttle_classes([TenCallsPerMinute])
@@ -67,7 +67,7 @@ def densities_list_create(request, pondId):
     if request.method == 'GET':
         pond = Pond.objects.get(id=pondId)
         single_pond_densities = pond.stockingdensity_set.order_by('-date_checked')
-        perpage = request.query_params.get('perpage', default=2)
+        perpage = request.query_params.get('perpage', default=4)
         page = request.query_params.get('page', default=1)
         paginator = Paginator(single_pond_densities, per_page=perpage)
         try:
@@ -151,8 +151,9 @@ def user_detail(request, pk):
     
 
 
+class CustomVerifyEmailView(VerifyEmailView):
+    pass
 
-
-
-
+class CustomEmailConfirmView(ConfirmEmailView):
+    pass
 

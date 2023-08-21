@@ -1,5 +1,5 @@
 from django.contrib import admin
-from stockright.models import StockingDensity, Pond
+from stockright.models import StockingDensity, Pond, CustomUser
 
 # Register your models here.
 class PondAmin(admin.ModelAdmin):
@@ -14,3 +14,4 @@ class StockingDensityAdmin(admin.ModelAdmin):
 
 admin.site.register(StockingDensity, StockingDensityAdmin)
 admin.site.register(Pond, PondAmin)
+admin.site.register(CustomUser)

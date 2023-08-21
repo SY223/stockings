@@ -1,5 +1,5 @@
 from django.test import TestCase
-from stockright.models import Pond, StockingDensity
+from stockright.models import Pond, StockingDensity, CustomUser
 from django.contrib.auth.models import User
 from datetime import date
 
@@ -8,7 +8,11 @@ from datetime import date
 class PondModelTestCase(TestCase):
     def setUp(self):
         #setup the user object and pond object
-        self.user = User.objects.create_user(username='Brighton', password='thankyou33')
+        self.user = CustomUser.objects.create_user(
+            username='Brighton',
+            email='mylord@gmail.com',
+            password='thankyou33'
+        )
         self.pond = Pond.objects.create(
             name='riverdale',
             date_added=date.today(),

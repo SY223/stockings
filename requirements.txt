@@ -8,7 +8,9 @@ dj-rest-auth==4.0.1
 Django==4.2.1
 django-allauth==0.54.0
 django-bootstrap3==23.1
+django-cors-headers==4.2.0
 djangorestframework==3.14.0
+djangorestframework-simplejwt==5.2.2
 idna==3.4
 mysqlclient==2.1.1
 oauthlib==3.2.2
