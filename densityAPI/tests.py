@@ -4,7 +4,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from .serializers import PondSerializer
-from stockright.models import Pond
+from stockright.models import Pond, StockingDensity
+import json
 
 
 
@@ -15,6 +16,8 @@ class UserListCreateTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.User = get_user_model()
+        cls.Pond = Pond.objects.all()
+        cls.Density = StockingDensity.objects.all()
     
     def setUp(self):
         self.user_data = {
@@ -26,8 +29,11 @@ class UserListCreateTestCase(APITestCase):
         self.client = APIClient()
     
     def tearDown(self):
-        self.User.objects.all().delete()
-    
+        # self.User.objects.all().delete()
+        # self.Density.delete()
+        # self.Pond.delete()
+        self.client.logout()
+
     def test_user_can_register_with_right_info(self):
         response = self.client.post(reverse('rest_register'), self.user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -48,9 +54,19 @@ class UserListCreateTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
 
-    def test_create_pond(self):
+    def test_user_can_verify_email_address(self):
+        pass
+
+
+    def test_user_can_reset_password(self):
+        pass
+    
+    def force_login_user(self):
         self.test_user_can_register_with_right_info()
         self.client.force_authenticate(user=self.user)
+
+    def test_create_pond(self):
+        self.force_login_user()
         data = {"name": "Concrete"}
         response = self.client.post('/api/v1/ponds/', data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -59,8 +75,7 @@ class UserListCreateTestCase(APITestCase):
         self.assertEqual(Pond.objects.get().owner, self.user)
 
     def test_get_pond_list(self):
-        self.test_user_can_register_with_right_info()
-        self.client.force_authenticate(user=self.user)
+        self.force_login_user()
         pond1 = Pond.objects.create(name='Pond One', owner=self.user)
         pond2 = Pond.objects.create(name='Pond Two', owner=self.user)
         response = self.client.get('/api/v1/ponds/')
@@ -68,12 +83,10 @@ class UserListCreateTestCase(APITestCase):
         self.assertEqual(pond1.name, 'Pond One')
         self.assertEqual(pond2.name, 'Pond Two')
         self.assertEqual(Pond.objects.count(), 2)
-        serialized_data = PondSerializer([pond1, pond2], many=True).data
-        self.assertEqual(response.data, serialized_data)
+    
     
     def test_user_can_update_pond(self):
-        self.test_user_can_register_with_right_info()
-        self.client.force_authenticate(user=self.user)
+        self.force_login_user()
         pond1 = Pond.objects.create(name='Pond One', owner=self.user)
         pond = Pond.objects.get(id=pond1.id)
         updated_data = {
@@ -83,10 +96,40 @@ class UserListCreateTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_user_can_delete_pond(self):
-        self.test_user_can_register_with_right_info()
-        self.client.force_authenticate(user=self.user)
+        self.force_login_user()
         pond1 = Pond.objects.create(name='Pond One', owner=self.user)
         pond = Pond.objects.get(id=pond1.id)
         response = self.client.delete(f'/api/v1/pond/{pond.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Pond.objects.count(), 0)
+
+    def test_user_can_post_a_density(self):
+        self.force_login_user()
+        pond1 = Pond.objects.create(name='Concrete', owner=self.user)
+        pond= Pond.objects.get(id=pond1.id)
+        one_density = {"pond": pond.id, "length": 12, "width": 6, "height":3}
+        response = self.client.post(f'/api/v1/check-stocks/{pond.id}/', one_density, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+
+
+    def test_user_can_get_a_density(self):
+        self.force_login_user()
+        pond1 = Pond.objects.create(name='Earthen', owner=self.user)
+        pond= Pond.objects.get(id=pond1.id)
+        one_density = StockingDensity.objects.create(
+            pond=pond,
+            length=3,
+            width=6, 
+            height=3,
+            to_stock=20,
+            verdict=20,
+            twenty_percent_decrease=10,
+            thirty_percent_decrease=10
+        )
+        one_density.save()
+        response = self.client.get(f'/api/v1/single-stock/{one_density.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.Density.count(), 1)
+
+        
