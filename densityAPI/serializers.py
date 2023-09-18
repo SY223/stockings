@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from stockright.models import Pond, StockingDensity, CustomUser
+from stockright.models import Pond, StockingDensity, CustomUser, Profile
 from rest_framework.validators import ValidationError
 from rest_framework.authtoken.models import Token
 from dj_rest_auth.serializers import LoginSerializer
-from rest_framework.validators import UniqueTogetherValidator
 from django.contrib.auth import get_user_model
+
 
 
 
@@ -18,11 +18,19 @@ class CustomLoginSerializer(LoginSerializer):
         pass
 
 
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'email_address_verified', 'is_active', 'date_joined']
 
+
+class ProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = Profile
+        fields = ['id', 'user', 'firstname', 'lastname', 'state', 'city']
 
 
 class PondSerializer(serializers.ModelSerializer):

@@ -1,18 +1,23 @@
-from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework import status
-from stockright.models import Pond, StockingDensity
-from .serializers import PondSerializer, DensitySerializer, UserSerializer
+from stockright.models import Pond, StockingDensity, CustomUser, Profile
+from .serializers import PondSerializer, DensitySerializer, UserSerializer, ProfileSerializer
 from stockright.pond_logic import pondvolume, thirty_p_decrease, twenty_p_decrease
 from django.core.paginator import Paginator, EmptyPage
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.throttling import UserRateThrottle
 from .throttles import TenCallsPerMinute
 from rest_framework.response import Response 
 from django.contrib.auth import get_user_model
-from dj_rest_auth.registration.views import VerifyEmailView
-from allauth.account.views import ConfirmEmailView
+from rest_framework.views import APIView
+from rest_framework.generics import get_object_or_404
+from allauth.account.admin import EmailAddress
+from allauth.account.utils import send_email_confirmation
+from rest_framework.exceptions import APIException
+
+
+
 
 
 User = get_user_model()
@@ -110,50 +115,80 @@ def density_detail(request, densityId):
     elif request.method == 'DELETE':
         density.delete()
         return Response(status=status.HTTP_200_OK)
-
-
-@api_view(['GET', 'POST'])
-@permission_classes([IsAdminUser,])
-@throttle_classes([TenCallsPerMinute])
-def user_list_create(request):
-    if request.method == 'GET':
-        queryset = User.objects.all()
-        serialized_item = UserSerializer(queryset, many=True)
-        return Response(serialized_item.data, status=status.HTTP_200_OK)
-    if request.method == 'POST':
-        serialized_item = UserSerializer(data=request.data)
-        if serialized_item.is_valid():
-            serialized_item.save()
-            return Response(serialized_item.data, status=status.HTTP_201_CREATED)
-        return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAdminUser,])
-@throttle_classes([TenCallsPerMinute])
-def user_detail(request, pk):
-    try:
-        queryset = User.objects.get(pk=pk)
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
-        serialized_item = UserSerializer(queryset)
-        return Response(serialized_item.data)
-    elif request.method == 'PUT':
-        serialized_item = UserSerializer(data=request.data)
-        if serialized_item.is_valid():
-            serialized_item.save()
-            return Response(serialized_item.data)
-        return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'DELETE':
-        queryset.delete()
-        return Response(status=status.HTTP_200_OK)
     
+class NewEmailConfirmation(APIView):
+    permission_classes = [AllowAny,]
+    def post(self, request):
+        user = get_object_or_404(User, email=request.data['email'])
+        emailAddress = EmailAddress.objects.filter(user=user, verified=True).exists()
+
+        if emailAddress:
+            return Response({'message': 'This email is already verified'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                send_email_confirmation(request, user=user)
+                return Response({'message': 'Email confirmation sent'}, status=status.HTTP_201_CREATED)
+            except APIException:
+                return Response({'message': 'This email does not exist, please create a new account'}, status=status.HTTP_403_FORBIDDEN)
 
 
-class CustomVerifyEmailView(VerifyEmailView):
-    pass
+# @api_view(['GET', 'POST'])
+# @permission_classes([IsAdminUser,])
+# @throttle_classes([TenCallsPerMinute])
+# def user_list_create(request):
+#     if request.method == 'GET':
+#         queryset = User.objects.all()
+#         serialized_item = UserSerializer(queryset, many=True)
+#         return Response(serialized_item.data, status=status.HTTP_200_OK)
+#     if request.method == 'POST':
+#         serialized_item = UserSerializer(data=request.data)
+#         if serialized_item.is_valid():
+#             serialized_item.save()
+#             return Response(serialized_item.data, status=status.HTTP_201_CREATED)
+#         return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CustomEmailConfirmView(ConfirmEmailView):
-    pass
+
+# @api_view(['GET', 'PUT', 'DELETE'])
+# @permission_classes([IsAdminUser,])
+# @throttle_classes([TenCallsPerMinute])
+# def user_detail(request, pk):
+#     try:
+#         queryset = User.objects.get(pk=pk)
+#     except User.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+#     if request.method == 'GET':
+#         serialized_item = UserSerializer(queryset)
+#         return Response(serialized_item.data)
+#     elif request.method == 'PUT':
+#         serialized_item = UserSerializer(data=request.data)
+#         if serialized_item.is_valid():
+#             serialized_item.save()
+#             return Response(serialized_item.data)
+#         return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
+#     elif request.method == 'DELETE':
+#         queryset.delete()
+#         return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET','PUT'])
+def profile_list_create(request, profileId):
+    try:
+        user = request.user
+        profile_id = Profile.objects.get(user__id=profileId)
+    except Profile.DoesNotExist:
+        return Response({"detail": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+    if user == user.user_profile:
+        if request.method == 'GET':
+            serialized_item = ProfileSerializer(profile_id)
+            return Response(serialized_item.data)
+        if request.method == 'PUT':
+            serialized_item = ProfileSerializer(data=request.data)
+            if serialized_item.is_valid():
+                serialized_item.save()
+                return Response(serialized_item.data)
+    else:
+        return Response({"Error": "Forbidden"}, status=status.HTTP_403_FORBIDDEN) 
+  
+
+
+
 

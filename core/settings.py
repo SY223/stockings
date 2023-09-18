@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'bootstrap3',
+    'corsheaders',
     #MyApps
     'stockright.apps.StockrightConfig',
     'densityAPI.apps.DensityapiConfig',
@@ -50,7 +51,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    #'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -170,6 +170,9 @@ REST_FRAMEWORK = {
 }
 
 
+SITE_ID = 1
+
+
 REST_AUTH = {
     'LOGIN_SERIALIZER': 'densityAPI.serializers.CustomLoginSerializer',
     'USE_JWT': True,
@@ -217,23 +220,24 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
+AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
-)
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 
-SITE_ID = 1
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = "optional" or "mandatory"
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
-LOGIN_URL = 'https://localhost:8000/api/v1/dj-rest-auth/login/'
+LOGIN_URL = 'http://127.0.0.1:8000/api/v1/auth/login/'
 
 LOGIN_REDIRECT_URL = 'stockright:index'
-LOGIN_URL = 'users/login'
+#LOGIN_URL = 'users/login'
 LOGOUT_URL = 'users/logout'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'

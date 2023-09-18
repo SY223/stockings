@@ -41,6 +41,8 @@ class UserListCreateTestCase(APITestCase):
         self.assertEqual(self.User.objects.count(), 1)
         self.assertEqual(self.User.objects.get().email, "onlyme@gmail.com")
         self.assertFalse(self.User.objects.get().email_address_verified)
+        my_user = User.objects.get(username='john')
+        self.assertEqual(self.user, my_user)
 
 
     def test_user_cannot_register_with_empty_data(self):
@@ -112,7 +114,7 @@ class UserListCreateTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Pond.objects.count(), 0)
 
-    def test_user_can_post_a_density(self):
+    def test_user_can_check_a_density(self):
         self.test_user_can_login()
         pond1 = Pond.objects.create(name='Concrete', owner=self.user)
         pond= Pond.objects.get(id=pond1.id)
@@ -120,7 +122,7 @@ class UserListCreateTestCase(APITestCase):
         response = self.client.post(f'/api/v1/check-stocks/{pond.id}/', one_density, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_user_can_get_a_density(self):
+    def test_user_can_retrieve_a_density(self):
         self.test_user_can_login()
         pond1 = Pond.objects.create(name='Earthen', owner=self.user)
         pond= Pond.objects.get(id=pond1.id)
