@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     #MyApps
     'stockright.apps.StockrightConfig',
     'densityAPI.apps.DensityapiConfig',
+    'common.apps.CommonConfig',
 ]
 
 MIDDLEWARE = [
@@ -231,7 +232,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_VERIFICATION = "optional" or "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
 LOGIN_URL = 'http://127.0.0.1:8000/api/v1/auth/login/'

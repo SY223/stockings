@@ -1,9 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
-from .serializers import PondSerializer
 from stockright.models import Pond, StockingDensity
 import json
 
