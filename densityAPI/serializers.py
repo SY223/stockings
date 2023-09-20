@@ -27,10 +27,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    #user = UserSerializer(read_only=True)
     class Meta:
         model = Profile
-        fields = ['id', 'firstname', 'lastname', 'state', 'city', 'user']
+        fields = ['firstname', 'lastname', 'state', 'city']
 
 
 class PondSerializer(serializers.ModelSerializer):

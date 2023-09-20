@@ -8,6 +8,7 @@ from common.models import BaseModel
 
 
 class CustomUser(AbstractUser):
+
     email_address_verified = models.BooleanField(default=False)
 
     def __str__(self):

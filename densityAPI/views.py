@@ -36,9 +36,11 @@ def pond_list_create(request):
             ponds = paginator.page(number=page)
         except EmptyPage:
             ponds = []
-        serializeed_item = PondSerializer(ponds, many=True)
-        return Response(serializeed_item.data, status=status.HTTP_200_OK)
-    if request.method == 'POST':
+        serialized_item = PondSerializer(ponds, many=True)
+        if serialized_item.data:
+            return Response(serialized_item.data, status=status.HTTP_200_OK)
+        return Response({'message': 'No pond data available'}, status=status.HTTP_204_NO_CONTENT)
+    elif request.method == 'POST':
         serialized_item = PondSerializer(data=request.data, context={'request':request})
         if serialized_item.is_valid():
             serialized_item.save(owner=request.user)
@@ -79,8 +81,10 @@ def densities_list_create(request, pondId):
         except EmptyPage:
             single_pond_densities = []
         serialized_item = DensitySerializer(single_pond_densities, many=True)
-        return Response(serialized_item.data, status=status.HTTP_200_OK)
-    if request.method == 'POST':
+        if serialized_item.data:
+            return Response(serialized_item.data, status=status.HTTP_200_OK)
+        return Response({'message': 'No density data available'}, status=status.HTTP_204_NO_CONTENT)
+    elif request.method == 'POST':
         pond= Pond.objects.get(id=pondId)
         serialized_item = DensitySerializer(data=request.data)
         if serialized_item.is_valid():
@@ -153,22 +157,34 @@ def breeder_detail(request, pk):
         queryset.delete()
         return Response(status=status.HTTP_200_OK)
 
-@api_view(['GET','POST','PUT'])
+@api_view(['GET','POST', 'PUT'])
 def profile_list_create(request):
-    try:
-        current_profile = Profile.objects.get(user=request.user.id)
-    except Profile.DoesNotExist:
-        return Response({"detail": "Profile not populated.."}, status=status.HTTP_404_NOT_FOUND)
+    user=request.user
     if request.method == 'GET':
-        serialized_item = ProfileSerializer(current_profile)
-        if serialized_item is None:
-            return Response({"Alert": "You need to populate your profile"})
-        return Response(serialized_item.data)
-    if request.method == 'POST':
-        serialized_item = ProfileSerializer(data=request.data, context={'request':request})
-        if serialized_item.is_valid():
-            serialized_item.save(user=request.user)
+        try:
+            profile = user.user_profile
+            serialized_item = ProfileSerializer(profile)
             return Response(serialized_item.data)
+        except Profile.DoesNotExist:
+            return Response({"detail": "Profile not populated.."}, status=status.HTTP_404_NOT_FOUND)
+    elif request.method == 'POST':
+        try:
+            profile = user.user_profile
+        except Profile.DoesNotExist:
+            profile = Profile(user=user)
+        serialized_item = ProfileSerializer(profile, data=request.data)
+        if serialized_item.is_valid():
+            serialized_item.save()
+            return Response(serialized_item.data, status=status.HTTP_201_CREATED)
+        return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'PUT':
+        profile = user.user_profile
+        serialized_item = ProfileSerializer(profile, data=request.data)
+        if serialized_item.is_valid():
+            serialized_item.save()
+            return Response(serialized_item.data)
+        return Response(serialized_item.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
   
     
